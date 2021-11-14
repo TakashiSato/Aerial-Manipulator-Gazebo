@@ -37,33 +37,33 @@ public: void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     	this->model->SetSelfCollide(False);
 		if(_sdf->HasElement("nameSpace"))
 			namespc  = _sdf->GetElement("nameSpace")->Get<std::string>();
-			
+
 		sequence = 0;
-	
+
 		std::string topicName = namespc + "/joint_info" ;
 
-		joint_state_pub = nh.advertise<sensor_msgs::JointState>(topicName, 1); 
-	
-    	this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&JointStateSensor::onUpdate, this));
-		
+		joint_state_pub = nh.advertise<sensor_msgs::JointState>(topicName, 1);
 
-	}  
+    	this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&JointStateSensor::onUpdate, this));
+
+
+	}
 
 public:	void onUpdate()
 	{
-		
+
 		// Get simulation time and initialize sensor message header //
 		sequence++;
 		ros::Time curr_time = ros::Time::now();
-		
-		std_msgs::Header header;	
+
+		std_msgs::Header header;
 		header.seq = sequence;
 		header.frame_id = " " ;
 		header.stamp = curr_time ;
-		
+
 		sensor_msgs::JointState joint_msg;
 		joint_msg.header = header;
-		
+
 		std::vector< std::string > names ;
 		std::vector< double > angles, velocities, efforts ;
 
@@ -71,25 +71,25 @@ public:	void onUpdate()
 		physics::JointPtr joint;
 		std::string joint_name;
 		std::string standard_prefix = namespc + "::" + namespc + "/land" ;
-				
+
 		for(int i=1; i<3 ; i++)
 		{
 			joint_name = standard_prefix + std::to_string(i) + "_joint" ;
 			joint = this->model->GetJoint(joint_name);
 			double speed = joint->GetVelocity(0) ;
-			double angle = joint->GetAngle(0).Radian() ;
+			double angle = joint->Position(0) ;
 			names.push_back(joint_name) ;
 			angles.push_back(angle) ;
-			velocities.push_back(speed) ; 
-			efforts.push_back(0.0); 	
+			velocities.push_back(speed) ;
+			efforts.push_back(0.0);
 		}
-		
+
 		// Finalize building the sensor message and publish //
 		joint_msg.name = names ;
 		joint_msg.position = angles ;
 		joint_msg.velocity = velocities ;
 		joint_msg.effort = efforts ;
-		
+
 		joint_state_pub.publish(joint_msg);
 
 	}

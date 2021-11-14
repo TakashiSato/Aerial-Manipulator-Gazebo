@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   std_msgs
   sensor_msgs
-  cmake_modules
+#   cmake_modules
 
 )
 
@@ -18,9 +18,9 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} /usr/include/eigen3)
 
 catkin_package(
-  DEPENDS 
-    roscpp 
-    gazebo_ros 
+  DEPENDS
+    roscpp
+    gazebo_ros
 )
 
 add_library(control_plugin SHARED src/controller.cpp)
@@ -30,7 +30,7 @@ add_library(gear_pub SHARED src/gear_joint_sensor.cpp)
 target_link_libraries(gear_pub ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 add_executable(kinova_tele src/robot_teleop_node.cpp)
-target_link_libraries(kinova_tele ${catkin_LIBRARIES} gazebo_math gazebo_common)
+target_link_libraries(kinova_tele ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 add_executable(harrier_tele src/uav_teleop_node.cpp)
 target_link_libraries(harrier_tele ${catkin_LIBRARIES} )
